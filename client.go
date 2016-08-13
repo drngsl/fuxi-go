@@ -9,6 +9,7 @@ import (
 )
 
 type Fuxi interface {
+	Activate() (implements []string, err error)
 	Create(name string, opts map[string]string) (err error)
 	Remove(name string) (err error)
 	Path(name string) (mountpoint string, err error)
@@ -20,8 +21,8 @@ type Fuxi interface {
 }
 
 type FuxiVolume struct {
-	Name 		string
-	Mountpoint 	string
+	Name		string
+	Mountpoint	string
 	Status          map[string]interface{}
 }
 
@@ -84,13 +85,32 @@ func (c Client) getURL(path string) string {
 	return fmt.Sprintf("%s://%s:%d/%s", c.schema, c.host, c.port, path)
 }
 
+type ActivateRequest struct {
+}
+
+type ActiveteResponse struct {
+	Implements	[]string
+}
+
+func (c Client) Activate() (implements []string, err error) {
+	var (
+		req	ActivateRequest
+		resp	ActiveteResponse
+	)
+	if err = c.post(c.getURL("Plugin.Activate"), req, &resp); err != nil{
+		return
+	}
+	implements = resp.Implements
+	return
+}
+
 type CreateRequest struct {
 	Name	string
 	Opts	map[string]string
 }
 
 type CreateResponse struct {
-	Err 	string
+	Err	string
 }
 
 func (c Client) Create(volName string, opts map[string]string) (err error) {
@@ -115,13 +135,13 @@ type RemoveRequest struct {
 }
 
 type RemoveResponse struct {
-	Err 	string
+	Err	string
 }
 
 func (c Client) Remove(volName string) (err error)  {
 	var (
-		req 	RemoveRequest
-		resp 	RemoveResponse
+		req	RemoveRequest
+		resp	RemoveResponse
 
 	)
 	req.Name = volName
@@ -146,7 +166,7 @@ type MountResponse struct  {
 func (c Client) Mount(volName string, ID string) (mountpoint string, err error) {
 	var (
 		req	MountRequest
-		resp 	MountResponse
+		resp	MountResponse
 	)
 	req.Name = volName
 	if err = c.post(c.getURL("VolumeDriver.Mount"), req, &resp); err != nil {
@@ -162,17 +182,17 @@ func (c Client) Mount(volName string, ID string) (mountpoint string, err error) 
 }
 
 type PathRequest struct {
-	Name 		string
+	Name		string
 }
 
 type PathResponse struct {
-	Mountpoint 	string
-	Err 		string
+	Mountpoint	string
+	Err		string
 }
 
 func (c Client) Path(volName string) (mountpoint string, err error) {
 	var (
-		req 	PathRequest
+		req	PathRequest
 		resp	PathResponse
 	)
 	req.Name = volName
@@ -193,12 +213,12 @@ type GetRequest	struct {
 }
 
 type GetResponse struct {
-	Volume 		FuxiVolume
+	Volume		FuxiVolume
 	Err		string
 }
 func (c Client) Get(volName string) (volume *FuxiVolume, err error) {
 	var (
-		req 	GetRequest
+		req	GetRequest
 		resp	GetResponse
 	)
 	req.Name = volName
@@ -220,13 +240,13 @@ type ListRequest struct {
 
 type ListResponse struct  {
 	Volumes		[]*FuxiVolume
-	Err 		string
+	Err		string
 
 }
 func (c Client) List() (volumes []*FuxiVolume, err error) {
 	var (
-		req 	ListRequest
-		resp 	ListResponse
+		req	ListRequest
+		resp	ListResponse
 	)
 	if err = c.post(c.getURL("VolumeDriver.List"), req, &resp); err != nil {
 		return
@@ -237,7 +257,7 @@ func (c Client) List() (volumes []*FuxiVolume, err error) {
 	if resp.Err != "" {
 		err = errors.New(resp.Err)
 	}
-	return volumes, err
+	return
 }
 
 type Capability struct {

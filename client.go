@@ -14,7 +14,6 @@ type Fuxi interface {
 	Remove(name string) (err error)
 	Path(name string) (mountpoint string, err error)
 	Mount(name, id string) (mountpoint string, err error)
-	Unmount(name, id string) (err error)
 	List() (volumes []*FuxiVolume, err error)
 	Get(name string) (volume *FuxiVolume, err error)
 	Capabilities() (capabilities Capability, err error)

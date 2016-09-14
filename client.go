@@ -8,6 +8,8 @@ import (
 	"net/http"
 )
 
+const VolumeNotFound = "Volume Not Found"
+
 type Fuxi interface {
 	Activate() (implements []string, err error)
 	Create(name string, opts map[string]string) (err error)
